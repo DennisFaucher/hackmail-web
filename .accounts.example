@@ -1,0 +1,9 @@
+# Copy to .accounts, fill in, then:  chmod 600 .accounts && docker compose up -d --force-recreate hackmail
+# Number accounts 1, 2, 3 ... The app password is the 16-character Google app password (spaces are fine).
+ACCOUNT_1_EMAIL=you@gmail.com
+ACCOUNT_1_NAME=Your Full Name
+ACCOUNT_1_PASSWORD=abcd efgh ijkl mnop
+
+#ACCOUNT_2_EMAIL=
+#ACCOUNT_2_NAME=
+#ACCOUNT_2_PASSWORD=

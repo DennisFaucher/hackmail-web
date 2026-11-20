@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HackMail</title>
+<link rel="stylesheet" href="/static/style.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%239e4b27'/%3E%3Cpath d='M6 10l10 8 10-8M6 10v12h20V10z' fill='none' stroke='%23fffdf8' stroke-width='2.2' stroke-linejoin='round'/%3E%3C/svg%3E">
+</head>
+<body>
+<div id="app">
+  <aside id="sidebar">
+    <div class="brand">HackMail</div>
+    <button id="composeBtn" class="primary wide">New Message</button>
+    <div class="section-title">Folders</div>
+    <nav id="folders" aria-label="Folders"></nav>
+    <div class="section-title">Accounts</div>
+    <div id="accounts"></div>
+    <div class="spacer"></div>
+    <button id="addAccountBtn" class="linklike">Add Account…</button>
+    <button id="editSigBtn" class="linklike">Edit Signature…</button>
+    <button id="removeAccountBtn" class="linklike">Remove Account…</button>
+  </aside>
+  <main id="main">
+    <div id="toolbar">
+      <form id="searchForm" role="search"><input id="search" type="search" placeholder="Search this folder (Gmail syntax)" autocomplete="off"></form>
+      <div id="tools"></div>
+    </div>
+    <section id="listPane" aria-label="Messages"><div id="list" tabindex="0"></div><div id="pill" hidden></div></section>
+    <div id="splitter" role="separator" aria-orientation="horizontal"></div>
+    <section id="reader" aria-label="Reader"><div class="empty">No message selected</div></section>
+  </main>
+</div>
+
+<dialog id="signin">
+  <form method="dialog" id="signinForm">
+    <h2>Add a Gmail account</h2>
+    <p class="hint">Use a Google <b>app password</b> (16 characters; spaces are removed). Unless you tick the box below, it is kept in this server's memory only and forgotten when the container restarts.</p>
+    <label>Email address<input id="siEmail" type="email" required autocomplete="username"></label>
+    <label>Your name (shown to recipients)<input id="siName" type="text" autocomplete="name"></label>
+    <label>App password<input id="siPassword" type="password" required autocomplete="current-password"></label>
+    <label class="check"><input id="siRemember" type="checkbox"> Remember this login</label>
+    <p class="hint small" id="siRememberHint" hidden>Saves the app password <b>in plain text</b> in the <code>.accounts</code> file on this computer (readable only by your user), so you are signed in automatically. You can remove it later with Remove Account.</p>
+    <div id="siError" class="error" role="alert"></div>
+    <div class="buttons"><button type="button" id="siCancel">Cancel</button><button class="primary" id="siSubmit">Sign In</button></div>
+  </form>
+</dialog>
+
+<dialog id="composeDlg">
+  <form method="dialog" id="composeForm">
+    <div class="compose-head"><h2 id="composeTitle">New Message</h2><button type="button" id="cmCancel">Cancel</button></div>
+    <label class="field">From<select id="cmFrom"></select></label>
+    <label class="field">To<input id="cmTo" type="text" autocomplete="off"></label>
+    <div id="ccbccToggle"><button type="button" class="linklike" id="showCc">Cc / Bcc</button></div>
+    <label class="field" id="ccRow" hidden>Cc<input id="cmCc" type="text" autocomplete="off"></label>
+    <label class="field" id="bccRow" hidden>Bcc<input id="cmBcc" type="text" autocomplete="off"></label>
+    <label class="field">Subject<input id="cmSubject" type="text" autocomplete="off"></label>
+    <div id="fmt">
+      <button type="button" data-cmd="bold" title="Bold"><b>B</b></button>
+      <button type="button" data-cmd="italic" title="Italic"><i>I</i></button>
+      <button type="button" data-cmd="underline" title="Underline"><u>U</u></button>
+      <button type="button" data-cmd="insertUnorderedList" title="Bulleted list">•</button>
+      <button type="button" data-cmd="insertOrderedList" title="Numbered list">1.</button>
+      <button type="button" id="cmLink" title="Link">Link</button>
+      <button type="button" id="cmAttach" title="Attach files">Attach</button>
+      <input id="cmFiles" type="file" multiple hidden>
+    </div>
+    <div id="cmBody" contenteditable="true" role="textbox" aria-multiline="true" aria-label="Message body"></div>
+    <div id="cmQuote" hidden><div class="quote-label"></div><iframe id="cmQuoteFrame" sandbox="allow-same-origin" title="Original message"></iframe></div>
+    <ul id="cmAttachments"></ul>
+    <div class="compose-foot">
+      <div id="cmStatus" role="status"></div>
+      <button class="primary" id="cmSend" type="button">Send</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="sigDlg">
+  <form method="dialog" id="sigForm">
+    <h2>Email signature</h2>
+    <p class="hint">Added to the end of each new message, reply, and forward for this account, as ordinary text you can edit or delete in the draft. It is kept in this browser only.</p>
+    <label>Account<select id="sigAccount"></select></label>
+    <label>Signature<textarea id="sigText" rows="6" maxlength="1000" placeholder="Your Name&#10;Title, Company&#10;555-0100"></textarea></label>
+    <div class="buttons"><button type="button" id="sigCancel">Cancel</button><button class="primary" type="button" id="sigSave">Save</button></div>
+  </form>
+</dialog>
+
+<dialog id="linkDlg">
+  <form method="dialog">
+    <h2>Open this link?</h2>
+    <p class="hint">The link goes to:</p>
+    <code id="linkTarget"></code>
+    <div class="buttons"><button value="cancel">Cancel</button><button type="button" id="linkCopy">Copy</button><button class="primary" id="linkOpen" value="open">Open in Browser</button></div>
+  </form>
+</dialog>
+
+<div id="toast" role="status" hidden></div>
+<script src="/static/app.js"></script>
+</body>
+</html>

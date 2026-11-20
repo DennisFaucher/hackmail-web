@@ -1,0 +1,50 @@
+# HackMail Web: a browser version of the HackMail macOS client.
+#   docker compose up -d --build            -> http://127.0.0.1:8080 (Gmail)
+#   docker compose --profile dev up -d      -> http://127.0.0.1:8081 against a local test mail server
+services:
+  hackmail:
+    build: .
+    container_name: hackmail-web
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8080:8080"   # loopback only; do not publish this to a network
+    # Run as your own uid so the 0600 .accounts file you own is readable and writable. Set HACKMAIL_UID/HACKMAIL_GID
+    # (output of `id -u` / `id -g`) in your shell or a .env file if they are not 1000.
+    user: "${HACKMAIL_UID:-1000}:${HACKMAIL_GID:-1000}"
+    # Optional saved logins (see .accounts.example), mounted read-write so "Remember this login" can add and remove entries.
+    # It is a plain-text file on your disk; it is never baked into the image or passed as environment variables.
+    volumes:
+      - ./.accounts:/data/accounts
+    environment:
+      HACKMAIL_ACCOUNTS_FILE: /data/accounts
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    tmpfs: [/tmp]
+    # Mail is never written to disk; only the optional .accounts file above is.
+
+  # Development only: a throwaway IMAP/SMTP server so the app can be tried without a real account.
+  greenmail:
+    profiles: [dev]
+    image: greenmail/standalone:2.1.3
+    container_name: hackmail-greenmail
+    environment:
+      GREENMAIL_OPTS: >-
+        -Dgreenmail.setup.test.all -Dgreenmail.hostname=0.0.0.0
+        -Dgreenmail.users.login=email
+        -Dgreenmail.users=tester:testpass@example.test,friend:friendpass@example.test
+
+  hackmail-dev:
+    profiles: [dev]
+    build: .
+    container_name: hackmail-web-dev
+    depends_on: [greenmail]
+    ports:
+      - "127.0.0.1:8081:8080"
+    environment:
+      HACKMAIL_IMAP_HOST: greenmail
+      HACKMAIL_IMAP_PORT: "3143"
+      HACKMAIL_IMAP_TLS: "0"
+      HACKMAIL_SMTP_HOST: greenmail
+      HACKMAIL_SMTP_PORT: "3025"
+      HACKMAIL_SMTP_TLS: "none"
